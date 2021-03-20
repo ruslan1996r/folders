@@ -6,21 +6,6 @@ class Store {
   }
 
   /**
-   * @param {String} url Path as parameter
-   * @returns {Array<String>} Will return the parsed path as an array of strings
-   */
-  parseUrl(url) {
-    try {
-      if (typeof url === 'string') {
-        return url.split('/')
-      }
-      throw new Error('Url is not a string')
-    } catch (e) {
-      console.error('[parseUrl][error]: ', e)
-    }
-  }
-
-  /**
    * @param {Array<String>} dirs Takes a path parsed as an array of strings
    * @param {Object} folder The current directory, which defaults to a store object
    */
@@ -39,7 +24,7 @@ class Store {
         this.createDir(dirs.slice(1), folder[rootUrl])
       }
     } catch (e) {
-      console.error('[createDir][error]: ', e)
+      console.error('[Store][createDir][error]: ', e)
     }
   }
 
@@ -52,13 +37,13 @@ class Store {
     try {
       const result = this.findDir(dirs, folder)
       if (result.error) {
-        return console.error('[deleteDir][error]: ', result.error)
+        return console.error('[Store][deleteDir][error]: ', result.error)
       }
       const { parentFolder, dirName } = result
       delete parentFolder[dirName]
       console.log(`The "${dirName}" directory has been removed`)
     } catch (e) {
-      console.error('[deleteDir][error]: ', e)
+      console.error('[Store][deleteDir][error]: ', e)
     }
   }
 
@@ -71,7 +56,7 @@ class Store {
     try {
       const result = this.findDir(dirsFrom, folder)
       if (result.error) {
-        return () => console.error('[moveDir][error]: ', result.error)
+        return () => console.error('[Store][moveDir][error]: ', result.error)
       }
       const { parentFolder, dirName } = result
       const dirCopy = { ...parentFolder[dirName] }
@@ -85,13 +70,13 @@ class Store {
       return (dirsTo) => {
         const result = this.findDir(dirsTo, folder)
         if (result.error) {
-          return console.error('[moveDir][error]: ', result.error)
+          return console.error('[Store][moveDir][error]: ', result.error)
         }
         const { parentFolder, dirName } = result
         parentFolder[dirName] = Object.assign(parentFolder[dirName], { [sourceDirName]: { ...dirCopy } })
       }
     } catch (e) {
-      console.error('[moveDir][error]: ', e)
+      console.error('[Store][moveDir][error]: ', e)
     }
   }
 
@@ -118,7 +103,7 @@ class Store {
         }
       }
     } catch (e) {
-      console.error('[findDir][error]: ', e)
+      console.error('[Store][findDir][error]: ', e)
     }
   }
 }
@@ -138,6 +123,21 @@ class StoreLogger extends Store {
       return console.log('Empty!')
     }
     console.log(this.lg(this.store))
+  }
+
+  /**
+   * @param {String} url Path as parameter
+   * @returns {Array<String>} Will return the parsed path as an array of strings
+   */
+  parseUrl(url) {
+    try {
+      if (typeof url === 'string') {
+        return url.split('/')
+      }
+      throw new Error('Url is not a string')
+    } catch (e) {
+      console.error('[StoreLogger][parseUrl][error]: ', e)
+    }
   }
 
   consoleSubscribe() {
@@ -178,15 +178,19 @@ class StoreLogger extends Store {
    * @returns {String} Will return the parsed line with breaks for the console
    */
   lg(obj, depth = 0) {
-    let logString = ''
-    const indent = depth ? new Array(depth).fill('  ').join('') : ''
-    for (const key in obj) {
-      logString += `${indent}${key}\n`
-      if (Object.keys(obj[key]).length) {
-        logString += this.lg(obj[key], depth + 1)
+    try {
+      let logString = ''
+      const indent = depth ? new Array(depth).fill('  ').join('') : ''
+      for (const key in obj) {
+        logString += `${indent}${key}\n`
+        if (Object.keys(obj[key]).length) {
+          logString += this.lg(obj[key], depth + 1)
+        }
       }
+      return logString
+    } catch (e) {
+      console.error('[StoreLogger][lg][error]: ', e)
     }
-    return logString
   }
 }
 
