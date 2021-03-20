@@ -5,6 +5,12 @@ class Store {
     this.store = {}
   }
 
+  get showList() {
+    if (!Object.keys(this.store).length) {
+      return console.log('Empty!')
+    }
+    console.log(this.lg(this.store))
+  }
   /**
    * @param {Array<String>} dirs Takes a path parsed as an array of strings
    * @param {Object} folder The current directory, which defaults to a store object
@@ -116,13 +122,6 @@ class StoreLogger extends Store {
       output: process.stdout
     });
     this.consoleSubscribe()
-  }
-
-  get showList() {
-    if (!Object.keys(this.store).length) {
-      return console.log('Empty!')
-    }
-    console.log(this.lg(this.store))
   }
 
   /**
