@@ -6,6 +6,7 @@ npm install
 ### Use the following commands to run 
 ```
 npm start or nodemon
+npm run test
 ```
 
 ### Instructions
