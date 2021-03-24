@@ -24,9 +24,10 @@ class StoreService {
       }
       let rootUrl = dirs[0]
 
-      if (rootUrl && !folder.hasOwnProperty(rootUrl)) {
-        folder[rootUrl] = {}
-      } else if (rootUrl) {
+      if (rootUrl) {
+        if (!folder.hasOwnProperty(rootUrl)) {
+          folder[rootUrl] = {}
+        }
         this.createDir(dirs.slice(1), folder[rootUrl])
       }
     } catch (e) {
