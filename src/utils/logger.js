@@ -19,6 +19,7 @@ class Logger {
   error(err, msg = "") {
     if (err in this.errors) {
       console.log(chalk[this.errors[err].color](err + ":"), chalk.white(this.errors[err].text, msg))
+      return `${err}: ${msg}`
     } else {
       console.log(chalk.red(`Unknown ${err} error`))
     }
