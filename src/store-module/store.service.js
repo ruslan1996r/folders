@@ -1,15 +1,16 @@
-const readline = require('readline');
+const { Logger } = require('../utils/logger')
 
-class Store {
+class StoreService {
   constructor() {
     this.store = {}
+    this.Log = new Logger()
   }
 
   get showList() {
     if (!Object.keys(this.store).length) {
-      return console.log('Empty!')
+      return this.Log.error('EMPTY')
     }
-    console.log(this.lg(this.store))
+    this.Log.print('LIST', this.store)
   }
   /**
    * @param {Array<String>} dirs Takes a path parsed as an array of strings
@@ -19,7 +20,7 @@ class Store {
     try {
       const result = this.findDir(dirs, folder)
       if (!result.error) {
-        return console.log(`This directory already exists`)
+        return this.Log.error('ALREADY_EXISTS', result.dirName)
       }
       let rootUrl = dirs[0]
 
@@ -30,7 +31,7 @@ class Store {
         this.createDir(dirs.slice(1), folder[rootUrl])
       }
     } catch (e) {
-      console.error('[Store][createDir][error]: ', e)
+      this.Log.error('UNEXPECTED_ERR', e)
     }
   }
 
@@ -43,13 +44,13 @@ class Store {
     try {
       const result = this.findDir(dirs, folder)
       if (result.error) {
-        return console.error('[Store][deleteDir][error]: ', result.error)
+        return this.Log.error('NOT_FOUND', result.error)
       }
       const { parentFolder, dirName } = result
       delete parentFolder[dirName]
       console.log(`The "${dirName}" directory has been removed`)
     } catch (e) {
-      console.error('[Store][deleteDir][error]: ', e)
+      this.Log.error('UNEXPECTED_ERR', e)
     }
   }
 
@@ -62,7 +63,7 @@ class Store {
     try {
       const result = this.findDir(dirsFrom, folder)
       if (result.error) {
-        return () => console.error('[Store][moveDir][error]: ', result.error)
+        return () => this.Log.error('NOT_FOUND', result.error)
       }
       const { parentFolder, dirName } = result
       const dirCopy = { ...parentFolder[dirName] }
@@ -76,13 +77,13 @@ class Store {
       return (dirsTo) => {
         const result = this.findDir(dirsTo, folder)
         if (result.error) {
-          return console.error('[Store][moveDir][error]: ', result.error)
+          return this.Log.error('NOT_FOUND', result.error)
         }
         const { parentFolder, dirName } = result
         parentFolder[dirName] = Object.assign(parentFolder[dirName], { [sourceDirName]: { ...dirCopy } })
       }
     } catch (e) {
-      console.error('[Store][moveDir][error]: ', e)
+      this.Log.error('UNEXPECTED_ERR', e)
     }
   }
 
@@ -109,88 +110,9 @@ class Store {
         }
       }
     } catch (e) {
-      console.error('[Store][findDir][error]: ', e)
+      this.Log.error('UNEXPECTED_ERR', e)
     }
   }
 }
 
-class StoreLogger extends Store {
-  constructor() {
-    super()
-    this.rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-    this.consoleSubscribe()
-  }
-
-  /**
-   * @param {String} url Path as parameter
-   * @returns {Array<String>} Will return the parsed path as an array of strings
-   */
-  parseUrl(url) {
-    try {
-      if (typeof url === 'string') {
-        return url.split('/')
-      }
-      throw new Error('Url is not a string')
-    } catch (e) {
-      console.error('[StoreLogger][parseUrl][error]: ', e)
-    }
-  }
-
-  consoleSubscribe() {
-    /**
-     * @param {String} input The string accepted by the console
-     * @returns {Void}
-     */
-    this.rl.on('line', (input) => {
-      const args = input.split(" ")
-      const [command, rootDirectory, moveDirectory] = args
-
-      switch (command) {
-        case 'CREATE':
-          this.createDir(this.parseUrl(rootDirectory))
-          break;
-        case 'DELETE':
-          this.deleteDir(this.parseUrl(rootDirectory))
-          break;
-        case 'MOVE':
-          this.moveDir(this.parseUrl(rootDirectory))(this.parseUrl(moveDirectory))
-          break;
-        case 'FIND':
-          console.log(this.findDir(this.parseUrl(rootDirectory), this.store))
-          break;
-        case 'LIST':
-          this.showList
-          break;
-        default:
-          this.showList
-          break;
-      }
-    });
-  }
-
-  /**
-   * @param {Object} obj Directory object
-   * @param {Number} depth Parameter indicating the depth of nesting for indentation
-   * @returns {String} Will return the parsed line with breaks for the console
-   */
-  lg(obj, depth = 0) {
-    try {
-      let logString = ''
-      const indent = depth ? new Array(depth).fill('  ').join('') : ''
-      for (const key in obj) {
-        logString += `${indent}${key}\n`
-        if (Object.keys(obj[key]).length) {
-          logString += this.lg(obj[key], depth + 1)
-        }
-      }
-      return logString
-    } catch (e) {
-      console.error('[StoreLogger][lg][error]: ', e)
-    }
-  }
-}
-
-new StoreLogger()
+module.exports = { StoreService }
