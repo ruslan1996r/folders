@@ -58,8 +58,8 @@ class StoreModule extends StoreService {
         this.Log.print(command, rootDirectory, moveDirectory)
         break;
       case 'FIND':
+        this.findDir(parseUrl(rootDirectory), this.store)
         this.Log.print(command, rootDirectory)
-        console.log(this.findDir(parseUrl(rootDirectory), this.store))
         break;
       case 'LIST':
         this.showList
