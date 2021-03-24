@@ -31,7 +31,7 @@ class StoreModule extends StoreService {
     try {
       const commandsPath = path.resolve(__dirname, '..', 'db', 'commands.txt')
       const commandsFile = fs.readFileSync(commandsPath, { encoding: 'utf-8' })
-      const commands = commandsFile.split('\r\n')
+      const commands = commandsFile.split(/\r?\n/)
       if (commands.length) {
         commands.forEach(command => this.callCommand(command))
       }
