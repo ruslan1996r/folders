@@ -6,7 +6,7 @@ class Logger {
       LIST: { color: "yellow" },
       CREATE: { color: "green" },
       DELETE: { color: "blue" },
-      FIND: { color: "white" },
+      FIND: { color: "magentaBright" },
       MOVE: { color: "cyanBright" },
     },
       this.errors = {
@@ -31,12 +31,16 @@ class Logger {
    * @param {String} moveDirectory
    */
   print(command, rootDirectory, moveDirectory) {
-    if (command in this.commands) {
-      if (command === 'LIST') {
-        console.log(chalk[this.commands[command].color](command), chalk.white('\n' + this._log(rootDirectory)))
-      } else {
-        console.log(chalk[this.commands[command].color](command), chalk.white('\n' + rootDirectory, moveDirectory))
-      }
+    if ((command in this.commands) && command === 'LIST') {
+      console.log(
+        chalk[this.commands[command].color](command),
+        chalk.white('\n' + this._log(rootDirectory))
+      )
+    } else if (command in this.commands) {
+      console.log(
+        chalk[this.commands[command].color](command),
+        chalk.white('\n' + rootDirectory, moveDirectory)
+      )
     } else {
       console.log(chalk.red(`Unknown ${command} command`))
     }
